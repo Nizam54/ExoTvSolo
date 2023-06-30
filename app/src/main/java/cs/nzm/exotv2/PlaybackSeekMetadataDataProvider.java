@@ -39,7 +39,7 @@ public class PlaybackSeekMetadataDataProvider extends PlaybackSeekDataProvider {
                 mSeekPositions[i] = i * interval;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //ignore seek thumbnails not supported
         }
     }
 

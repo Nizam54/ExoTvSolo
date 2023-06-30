@@ -131,7 +131,7 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
     @Override
     protected void onPreparedStateChanged() {
         super.onPreparedStateChanged();
-        if (isPrepared()) {
+        if (isPrepared() && getSeekProvider() != null) {
             ((PlaybackSeekMetadataDataProvider)getSeekProvider()).setDuration(getDuration());
         }
     }
