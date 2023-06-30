@@ -15,14 +15,12 @@
  */
 package cs.nzm.exotv2;
 
-import static com.google.android.exoplayer2.C.TRACK_TYPE_TEXT;
 import static com.google.android.exoplayer2.C.TRACK_TYPE_VIDEO;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.widget.Toast;
@@ -315,7 +313,9 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener {
     }
 
     public void showTrackDialog() {
-        Dialog track_selector = new TrackSelectionDialogBuilder(mContext, "Track Selector", mPlayer, TRACK_TYPE_VIDEO).build();
+        Dialog track_selector = new TrackSelectionDialogBuilder(mContext, "Track Selector", mPlayer, TRACK_TYPE_VIDEO)
+                .setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog)
+                .build();
         track_selector.show();
     }
 

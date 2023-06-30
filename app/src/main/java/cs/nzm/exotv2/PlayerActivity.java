@@ -14,13 +14,10 @@
 
 package cs.nzm.exotv2;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.core.os.BuildCompat;
 
 /**
  * Activity that hosts VideoConsumptionExampleWithExoPlayerFragment.
@@ -49,12 +46,6 @@ public class PlayerActivity extends FragmentActivity {
         // to update this intent when for example, user clicks on another video when the currently
         // playing video is in PIP mode, and a new video needs to be started.
         setIntent(intent);
-    }
-
-    public static boolean supportsPictureInPicture(Context context) {
-        return BuildCompat.isAtLeastN() &&
-                context.getPackageManager().hasSystemFeature(
-                        PackageManager.FEATURE_PICTURE_IN_PICTURE);
     }
 
 }
