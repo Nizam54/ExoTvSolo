@@ -34,16 +34,15 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
     private final PlaybackControlsRow.RewindAction rewindAction;
     private final PlaybackControlsRow.HighQualityAction mQualityAction;
     private final PlaybackControlsRow.ClosedCaptioningAction subtitleAction;
-    private final ExoPlayerAdapter adapter;
+    private final ExoPlayerAdapter playerAdapter;
 
     public VideoMediaPlayerGlue(Activity context, T impl) {
         super(context, impl);
-        adapter = (ExoPlayerAdapter) impl;
+        playerAdapter = (ExoPlayerAdapter) impl;
         forwardAction = new PlaybackControlsRow.FastForwardAction(context);
         rewindAction = new PlaybackControlsRow.RewindAction(context);
         mQualityAction = new PlaybackControlsRow.HighQualityAction(context);
         subtitleAction = new PlaybackControlsRow.ClosedCaptioningAction(context);
-        subtitleAction.setIndex(PlaybackControlsRow.ClosedCaptioningAction.INDEX_ON);
     }
 
     @Override
@@ -77,19 +76,24 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
 
     private void dispatchAction(Action action) {
         if (mQualityAction.equals(action)) {
-            adapter.showTrackDialog();
+            playerAdapter.showTrackDialog();
         } else if (forwardAction.equals(action)) {
-            adapter.fastForward();
+            playerAdapter.fastForward();
         } else if (rewindAction.equals(action)) {
-            adapter.rewind();
-        } else {
-            if (subtitleAction.equals(action)) {
-                adapter.toggleSubs();
+            playerAdapter.rewind();
+        } else if (subtitleAction.equals(action)) {
+            if (playerAdapter.hasSubsTrack) {
+                playerAdapter.toggleSubs();
+                switchButtonIndex((PlaybackControlsRow.MultiAction) action);
             }
-            PlaybackControlsRow.MultiAction multiAction = (PlaybackControlsRow.MultiAction) action;
-            multiAction.nextIndex();
-            notifyActionChanged(multiAction);
+        } else {
+            switchButtonIndex((PlaybackControlsRow.MultiAction) action);
         }
+    }
+
+    private void switchButtonIndex(PlaybackControlsRow.MultiAction action) {
+        action.nextIndex();
+        notifyActionChanged(action);
     }
 
     private void notifyActionChanged(PlaybackControlsRow.MultiAction action) {
@@ -131,8 +135,16 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
     @Override
     protected void onPreparedStateChanged() {
         super.onPreparedStateChanged();
-        if (isPrepared() && getSeekProvider() != null) {
-            ((PlaybackSeekMetadataDataProvider)getSeekProvider()).setDuration(getDuration());
+        if (isPrepared()) {
+            if (getSeekProvider() != null) {
+                ((PlaybackSeekMetadataDataProvider) getSeekProvider()).setDuration(getDuration());
+            }
+            if (!playerAdapter.hasSubsTrack) {
+                subtitleAction.setIndex(PlaybackControlsRow.ClosedCaptioningAction.INDEX_OFF);
+            } else {
+                subtitleAction.setIndex(PlaybackControlsRow.ClosedCaptioningAction.INDEX_ON);
+            }
+            notifyActionChanged(subtitleAction);
         }
     }
 }

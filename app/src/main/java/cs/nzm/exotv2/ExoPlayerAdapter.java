@@ -36,6 +36,7 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Tracks;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.text.CueGroup;
@@ -53,6 +54,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener {
 
     Context mContext;
     final ExoPlayer mPlayer;
+    boolean hasSubsTrack;
     SubtitleView subtitleView;
     SurfaceHolderGlueHost mSurfaceHolderGlueHost;
     final Runnable mRunnable = new Runnable() {
@@ -278,16 +280,16 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener {
      */
     public MediaSource onCreateMediaSource(Uri uri, Uri subsUri) {
         String userAgent = Util.getUserAgent(mContext, "ExoPlayerAdapter");
-        MediaItem.SubtitleConfiguration subtitle = new MediaItem.SubtitleConfiguration.Builder(subsUri)
-                .setMimeType(MimeTypes.TEXT_VTT)
-                .setLanguage("en")
-                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT|C.SELECTION_FLAG_AUTOSELECT)
-                .build();
-        MediaItem mediaItem = new MediaItem.Builder()
-                .setUri(uri)
-                .setSubtitleConfigurations(ImmutableList.of(subtitle))
-                .build();
-        return new DefaultMediaSourceFactory(mContext).createMediaSource(mediaItem);
+        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(uri);
+        if (subsUri != null) {
+            MediaItem.SubtitleConfiguration subtitle = new MediaItem.SubtitleConfiguration.Builder(subsUri)
+                    .setMimeType(MimeTypes.TEXT_VTT)
+                    .setLanguage("en")
+                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT | C.SELECTION_FLAG_AUTOSELECT)
+                    .build();
+            mediaItemBuilder.setSubtitleConfigurations(ImmutableList.of(subtitle));
+        }
+        return new DefaultMediaSourceFactory(mContext).createMediaSource(mediaItemBuilder.build());
     }
 
     private void prepareMediaForPlaying() {
@@ -363,6 +365,19 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener {
         Toast.makeText(mContext, "Playback Error!!"+error.getMessage(), Toast.LENGTH_LONG).show();
         mBufferingStart = false;
         notifyBufferingStartEnd();
+    }
+
+    @Override
+    public void onTracksChanged(Tracks tracks) {
+        Player.Listener.super.onTracksChanged(tracks);
+        hasSubsTrack = false;
+        for (Tracks.Group tracksGroup : tracks.getGroups()) {
+            if (tracksGroup.getType() == C.TRACK_TYPE_TEXT &&
+                    tracksGroup.isSelected()) {
+                hasSubsTrack = true;
+                break;
+            }
+        }
     }
 
     @Override
