@@ -1,0 +1,6 @@
+<resources>
+
+    <style name="Theme.ExoTV" parent="@style/Theme.Leanback" >
+        <item name="android:windowBackground">@drawable/bg_living_room_wide</item>
+        <item name="browseRowsMarginTop">275dp</item>
+    </style></resources>
