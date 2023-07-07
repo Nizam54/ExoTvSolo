@@ -14,7 +14,9 @@
 
 package cs.nzm.exotv2;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,7 +35,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class PlayerFragment extends VideoSupportFragment {
 
-//    private static final String URL = "https://player.vimeo.com/external/263887588.mp4.m3u8";
+    //    private static final String URL = "https://player.vimeo.com/external/263887588.mp4.m3u8";
 //    private static final String URL = "https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8";
     private static final String URL = "https://vz-fa6a66b7-f16.b-cdn.net/9c53dea5-510a-4c5d-9682-a82cf3da0c3c/playlist.m3u8";
     private static final String SUBTITLE = "https://vz-fa6a66b7-f16.b-cdn.net/9c53dea5-510a-4c5d-9682-a82cf3da0c3c/captions/EN.vtt";
@@ -108,6 +110,16 @@ public class PlayerFragment extends VideoSupportFragment {
             mMediaPlayerGlue.pause();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        if (getActivity() != null) {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra(PlayerActivity.PLAYER_RESUME_POS, playerAdapter.mPlayer.getCurrentPosition());
+            getActivity().setResult(Activity.RESULT_OK, resultIntent);
+        }
+        super.onStop();
     }
 
     @Override

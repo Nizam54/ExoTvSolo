@@ -25,6 +25,7 @@ import androidx.fragment.app.FragmentActivity;
 public class PlayerActivity extends FragmentActivity {
 
     public static final String TAG = "VideoExampleWithExoPlayerActivity";
+    public static final String PLAYER_RESUME_POS = "resume_position";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
