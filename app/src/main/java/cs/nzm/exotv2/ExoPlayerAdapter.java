@@ -57,6 +57,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener {
     boolean hasSubsTrack;
     SubtitleView subtitleView;
     SurfaceHolderGlueHost mSurfaceHolderGlueHost;
+    long initialPosition;
     final Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
@@ -297,6 +298,9 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener {
         if (mMediaSourceUri != null) {
             MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri, mMediaSubsUri);
             mPlayer.setMediaSource(mediaSource);
+            if (initialPosition > 0) {
+                mPlayer.seekTo(initialPosition);
+            }
             mPlayer.prepare();
         } else {
             return;

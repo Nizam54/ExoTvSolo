@@ -35,7 +35,7 @@ public class MediaMetaData implements Parcelable{
     private int mMediaAlbumArtResId;
     private String mMediaAlbumArtUrl;
     private boolean isLive;
-
+    private long startPosition;
 
     protected MediaMetaData(Parcel in) {
         mMediaSourceUri = in.readParcelable(Uri.class.getClassLoader());
@@ -47,6 +47,26 @@ public class MediaMetaData implements Parcelable{
         mMediaAlbumArtResId = in.readInt();
         mMediaAlbumArtUrl = in.readString();
         isLive = in.readByte() != 0;
+        startPosition = in.readLong();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mMediaSourceUri, flags);
+        dest.writeParcelable(mMediaSubsUri, flags);
+        dest.writeString(mMediaSourcePath);
+        dest.writeString(mMediaTitle);
+        dest.writeString(mMediaArtistName);
+        dest.writeString(mMediaAlbumName);
+        dest.writeInt(mMediaAlbumArtResId);
+        dest.writeString(mMediaAlbumArtUrl);
+        dest.writeByte((byte) (isLive ? 1 : 0));
+        dest.writeLong(startPosition);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<MediaMetaData> CREATOR = new Creator<MediaMetaData>() {
@@ -134,22 +154,11 @@ public class MediaMetaData implements Parcelable{
         mMediaAlbumArtUrl = mediaAlbumArtUrl;
     }
 
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public long getStartPosition() {
+        return startPosition;
     }
 
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mMediaSourceUri, flags);
-        dest.writeParcelable(mMediaSubsUri, flags);
-        dest.writeString(mMediaSourcePath);
-        dest.writeString(mMediaTitle);
-        dest.writeString(mMediaArtistName);
-        dest.writeString(mMediaAlbumName);
-        dest.writeInt(mMediaAlbumArtResId);
-        dest.writeString(mMediaAlbumArtUrl);
-        dest.writeByte((byte) (isLive ? 1 : 0));
+    public void setStartPosition(long startPosition) {
+        this.startPosition = startPosition;
     }
 }
