@@ -18,11 +18,9 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
-
 /**
  * Holds the meta data such as media title, artist and cover art. It'll be used by the {@link
- * cs.nzm.atvexo.player.VideoMediaPlayerGlue} for passing media item information between app and {@link cs.nzm.atvexo.player.VideoMediaPlayerGlue}.
+ * VideoMediaPlayerGlue} for passing media item information between app and {@link VideoMediaPlayerGlue}.
  */
 public class MediaMetaData implements Parcelable{
 
@@ -36,6 +34,11 @@ public class MediaMetaData implements Parcelable{
     private String mMediaAlbumArtUrl;
     private boolean isLive;
     private long startPosition;
+    private CWCallback positionCallback;
+
+    interface CWCallback {
+        void onPositionUpdated(long position);
+    }
 
     protected MediaMetaData(Parcel in) {
         mMediaSourceUri = in.readParcelable(Uri.class.getClassLoader());
@@ -160,5 +163,13 @@ public class MediaMetaData implements Parcelable{
 
     public void setStartPosition(long startPosition) {
         this.startPosition = startPosition;
+    }
+
+    public CWCallback getPositionCallback() {
+        return positionCallback;
+    }
+
+    public void setPositionCallback(CWCallback positionCallback) {
+        this.positionCallback = positionCallback;
     }
 }

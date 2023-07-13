@@ -17,9 +17,11 @@ package cs.nzm.exotv2;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +37,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class PlayerFragment extends VideoSupportFragment {
 
-    //    private static final String URL = "https://player.vimeo.com/external/263887588.mp4.m3u8";
+//        private static final String URL = "https://player.vimeo.com/external/263887588.mp4.m3u8";
 //    private static final String URL = "https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8";
     private static final String URL = "https://vz-fa6a66b7-f16.b-cdn.net/9c53dea5-510a-4c5d-9682-a82cf3da0c3c/playlist.m3u8";
     private static final String SUBTITLE = "https://vz-fa6a66b7-f16.b-cdn.net/9c53dea5-510a-4c5d-9682-a82cf3da0c3c/captions/EN.vtt";
@@ -51,6 +53,10 @@ public class PlayerFragment extends VideoSupportFragment {
         }
     };
     private ExoPlayerAdapter playerAdapter;
+
+    private final int interval = 5000; // 5 Seconds
+    private Handler handler = new Handler();
+    private Runnable runnable;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +88,16 @@ public class PlayerFragment extends VideoSupportFragment {
             } else {
                 mMediaPlayerGlue.setSeekProvider(new PlaybackSeekMetadataDataProvider(getActivity(), intentMetaData.getMediaSourcePath(), 10000));
             }
+            if (intentMetaData.getPositionCallback() != null) {
+                runnable = () -> {
+                    try {
+                        Log.d("Nzm","timer hit:"+playerAdapter.mPlayer.getCurrentPosition());
+                        intentMetaData.getPositionCallback().onPositionUpdated(playerAdapter.mPlayer.getCurrentPosition());
+                    } finally {
+                        handler.postDelayed(runnable, interval);
+                    }
+                };
+            }
         } else {
             mMediaPlayerGlue.setTitle("Clear hls - Angel one");
             mMediaPlayerGlue.setSubtitle("Example with subs and quality");
@@ -103,11 +119,27 @@ public class PlayerFragment extends VideoSupportFragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (runnable != null) {
+            handler.postDelayed(runnable, interval);
+        }
+    }
 
     @Override
     public void onPause() {
+        if (getActivity() != null) {
+            SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putLong(PlayerActivity.PLAYER_RESUME_POS, playerAdapter.mPlayer.getCurrentPosition());
+            editor.apply();
+        }
         if (mMediaPlayerGlue != null) {
             mMediaPlayerGlue.pause();
+        }
+        if (runnable != null) {
+            handler.removeCallbacks(runnable);
         }
         super.onPause();
     }
